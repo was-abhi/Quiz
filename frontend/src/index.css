@@ -1,111 +1,661 @@
+
+
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+    color: #182433;
+    background: #f5f7fb;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+    --primary: #206bc4;
+    --primary-hover: #1a5aa8;
+
+    --success: #2fb344;
+    --success-bg: #e9f8ed;
+
+    --danger: #d63939;
+    --danger-bg: #fceaea;
+
+    --text: #182433;
+    --muted: #667382;
+    --border: #dce1e7;
+
+    --surface: #ffffff;
+    --surface-muted: #f6f8fa;
+
+    --header: #ffffff;
+    --dark: #182433;
+
+    --radius: 6px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+* {
+    box-sizing: border-box;
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+html,
+body,
+#root {
+    margin: 0;
+    min-height: 100%;
 }
 
 body {
-  margin: 0;
+    background: #f5f7fb;
+    color: var(--text);
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+button,
+input,
+textarea {
+    font: inherit;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+button {
+    cursor: pointer;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
+
+/* =========================================================
+   JUDGE APPLICATION
+========================================================= */
+
+.judge-page {
+    min-height: 100vh;
+    background: #f5f7fb;
+}
+
+
+/* ---------------------------------------------------------
+   HEADER
+--------------------------------------------------------- */
+
+.judge-header {
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 32px;
+
+    background: var(--header);
+    border-bottom: 1px solid var(--border);
+}
+
+.judge-header h1 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.judge-header p {
+    margin: 3px 0 0;
+
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.question-number {
+    padding: 7px 12px;
+
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+}
+
+
+/* ---------------------------------------------------------
+   MAIN CONTENT
+--------------------------------------------------------- */
+
+.judge-content {
+    width: min(1100px, calc(100% - 48px));
+    margin: 32px auto 60px;
+}
+
+
+/* ---------------------------------------------------------
+   LABELS
+--------------------------------------------------------- */
+
+.section-label {
+    margin-bottom: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    color: var(--muted);
+}
+
+
+/* ---------------------------------------------------------
+   QUESTION
+--------------------------------------------------------- */
+
+.quiz-section {
+    padding: 24px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.question-box {
+    margin-bottom: 24px;
+    padding: 16px 18px;
+
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.55;
+}
+
+.answer-box {
+    padding: 13px 16px;
+
+    background: #fff;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    font-size: 14px;
+    color: var(--text);
+}
+
+
+/* ---------------------------------------------------------
+   RESPONSE
+--------------------------------------------------------- */
+
+.response-section {
+    margin-top: 20px;
+    padding: 24px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    text-align: center;
+}
+
+.responder {
+    margin: 14px 0 22px;
+
+    font-size: 24px;
+    font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------
+   EVALUATION BUTTONS
+--------------------------------------------------------- */
+
+.evaluation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.evaluation-buttons button {
+    min-width: 130px;
+
+    padding: 10px 18px;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.right-button {
+    background: var(--success);
+    color: #ffffff;
+}
+
+.right-button:hover {
+    background: #279b3c;
+}
+
+.wrong-button {
+    background: var(--danger);
+    color: #ffffff;
+}
+
+.wrong-button:hover {
+    background: #bd3030;
+}
+
+
+/* ---------------------------------------------------------
+   SCORE
+--------------------------------------------------------- */
+
+.score-section {
+    margin-top: 20px;
+    padding: 24px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.scores {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.score {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 18px 20px;
+
+    background: #ffffff;
+}
+
+.score + .score {
+    border-left: 1px solid var(--border);
+}
+
+.score span {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.score strong {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------
+   JUDGE ACTIONS
+--------------------------------------------------------- */
+
+.judge-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 20px;
+}
+
+.judge-actions button {
+    padding: 10px 16px;
+
+    border-radius: var(--radius);
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.start-button {
+    background: var(--primary);
+    border: 1px solid var(--primary);
+    color: #ffffff;
+}
+
+.start-button:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.next-button {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.next-button:hover {
+    background: var(--surface-muted);
+}
+
+
+/* ---------------------------------------------------------
+   RESULT
+--------------------------------------------------------- */
+
+.judge-result {
+    margin-top: 20px;
+    padding: 14px;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+
+    text-align: center;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.judge-result.correct {
+    background: var(--success-bg);
+    border-color: #b7e4c1;
+    color: #207d32;
+}
+
+.judge-result.wrong {
+    background: var(--danger-bg);
+    border-color: #f0bcbc;
+    color: #a52828;
+}
+
+
+/* =========================================================
+   AUDIENCE VIEW
+========================================================= */
+
+.audience-page {
+    min-height: 100vh;
+
+    background: #182433;
+    color: #ffffff;
+}
+
+
+/* ---------------------------------------------------------
+   AUDIENCE HEADER
+--------------------------------------------------------- */
+
+.audience-header {
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 40px;
+
+    background: #ffffff;
+    color: var(--text);
+
+    border-bottom: 1px solid #dce1e7;
+}
+
+.audience-header span {
+    display: block;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    color: var(--muted);
+}
+
+.audience-header h1 {
+    margin: 3px 0 0;
+
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.live-indicator {
+    padding: 6px 10px;
+
+    background: var(--success-bg);
+    border: 1px solid #b7e4c1;
+    border-radius: var(--radius);
+
+    color: #207d32;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------
+   AUDIENCE CONTENT
+--------------------------------------------------------- */
+
+.audience-content {
+    width: min(1050px, calc(100% - 60px));
+    margin: 0 auto;
+}
+
+
+/* ---------------------------------------------------------
+   QUESTION
+--------------------------------------------------------- */
+
+.audience-question {
+    padding: 70px 20px 55px;
+
+    text-align: center;
+}
+
+.audience-question .section-label {
+    color: #9ba8b7;
+}
+
+.audience-question h2 {
+    max-width: 850px;
+
+    margin: 14px auto 0;
+
     font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+    font-weight: 500;
+    line-height: 1.35;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+
+/* ---------------------------------------------------------
+   FIRST RESPONSE
+--------------------------------------------------------- */
+
+.audience-response {
+    padding: 26px;
+
+    border-top: 1px solid #344255;
+    border-bottom: 1px solid #344255;
+
+    text-align: center;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.audience-response .section-label {
+    color: #9ba8b7;
+}
+
+.audience-responder {
+    margin-top: 8px;
+
+    font-size: 22px;
+    font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------
+   AUDIENCE RESULT
+--------------------------------------------------------- */
+
+.audience-result {
+    width: min(600px, 100%);
+
+    margin: 28px auto;
+    padding: 15px;
+
+    border-radius: var(--radius);
+
+    text-align: center;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.audience-result.correct {
+    background: #245b36;
+    border: 1px solid #34784a;
+    color: #d7f5de;
+}
+
+.audience-result.wrong {
+    background: #632f32;
+    border: 1px solid #864448;
+    color: #f9d9da;
+}
+
+
+/* ---------------------------------------------------------
+   AUDIENCE SCORES
+--------------------------------------------------------- */
+
+.audience-scores {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 16px;
+
+    margin-top: 40px;
+}
+
+.audience-scores div {
+    padding: 25px;
+
+    background: #202f42;
+    border: 1px solid #344255;
+    border-radius: var(--radius);
+
+    text-align: center;
+}
+
+.audience-scores span {
+    display: block;
+
+    color: #9ba8b7;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    letter-spacing: 0.05em;
+}
+
+.audience-scores strong {
+    display: block;
+
+    margin-top: 8px;
+
+    font-size: 40px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   DEVELOPMENT CONTROLS
+========================================================= */
+
+.dev-controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: 50px;
+    padding-bottom: 30px;
+
+    opacity: 0.45;
+}
+
+.dev-controls button {
+    padding: 6px 10px;
+
+    background: transparent;
+    border: 1px solid #718096;
+    border-radius: var(--radius);
+
+    color: #aeb9c7;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .judge-header {
+        padding: 0 18px;
+    }
+
+    .judge-content {
+        width: calc(100% - 24px);
+        margin-top: 20px;
+    }
+
+    .scores,
+    .audience-scores {
+        grid-template-columns: 1fr;
+    }
+
+    .score + .score {
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
+
+    .judge-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .judge-actions button {
+        width: 100%;
+    }
+
+    .audience-header {
+        padding: 0 20px;
+    }
+
+    .audience-content {
+        width: calc(100% - 30px);
+    }
+
+    .audience-question {
+        padding: 50px 10px 40px;
+    }
+
+    .audience-question h2 {
+        font-size: 27px;
+    }
+
+    .evaluation-buttons {
+        flex-direction: column;
+    }
+
+    .evaluation-buttons button {
+        width: 100%;
+    }
 }
