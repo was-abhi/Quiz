@@ -2,34 +2,76 @@ import { useState } from "react";
 
 function Judge() {
     const [questionNumber, setQuestionNumber] = useState(1);
+
     const [question, setQuestion] = useState(
         "What is the capital of France?"
     );
+
     const [answer, setAnswer] = useState("Paris");
 
-    const [firstResponder, setFirstResponder] = useState(1);
+    // Contestant currently answering
+    const [currentResponder, setCurrentResponder] = useState(1);
+
+    // null = no decision yet
+    // "correct" = current responder was marked correct
+    // "wrong" = current responder was marked wrong
     const [result, setResult] = useState(null);
+
+    // Who received the point for this question
+    const [pointAwardedTo, setPointAwardedTo] = useState(null);
 
     const [scores, setScores] = useState({
         1: 0,
         2: 0,
     });
 
+    // Start the question.
+    // For now, first response alternates between contestants.
     const startQuestion = () => {
         const responder = questionNumber % 2 === 1 ? 1 : 2;
 
-        setFirstResponder(responder);
+        setCurrentResponder(responder);
         setResult(null);
+        setPointAwardedTo(null);
     };
 
     const evaluateAnswer = (isCorrect) => {
-        setResult(isCorrect ? "correct" : "wrong");
-
         if (isCorrect) {
+            // If this question has already awarded a point,
+            // do nothing. A question can only give 1 point.
+            if (pointAwardedTo !== null) {
+                return;
+            }
+
             setScores((prev) => ({
                 ...prev,
-                [firstResponder]: prev[firstResponder] + 10,
+                [currentResponder]:
+                    prev[currentResponder] + 1,
             }));
+
+            setPointAwardedTo(currentResponder);
+            setResult("correct");
+
+        } else {
+            // If the current responder previously got the point,
+            // retract that point.
+            if (pointAwardedTo !== null) {
+                setScores((prev) => ({
+                    ...prev,
+                    [pointAwardedTo]:
+                        prev[pointAwardedTo] - 1,
+                }));
+
+                setPointAwardedTo(null);
+            }
+
+            setResult("wrong");
+
+            // Give the other contestant a chance.
+            const nextResponder =
+                currentResponder === 1 ? 2 : 1;
+
+            setCurrentResponder(nextResponder);
         }
     };
 
@@ -37,8 +79,14 @@ function Judge() {
         const nextNumber = questionNumber + 1;
 
         setQuestionNumber(nextNumber);
-        setFirstResponder(nextNumber % 2 === 1 ? 1 : 2);
+
+        const responder =
+            nextNumber % 2 === 1 ? 1 : 2;
+
+        setCurrentResponder(responder);
+
         setResult(null);
+        setPointAwardedTo(null);
 
         setQuestion(
             nextNumber % 2 === 1
@@ -89,14 +137,15 @@ function Judge() {
 
                 </section>
 
+
                 <section className="response-section">
 
                     <div className="section-label">
-                        FIRST RESPONSE
+                        CURRENT RESPONSE
                     </div>
 
                     <div className="responder">
-                        Contestant {firstResponder}
+                        Contestant {currentResponder}
                     </div>
 
                     <div className="evaluation-buttons">
@@ -123,6 +172,7 @@ function Judge() {
 
                 </section>
 
+
                 <section className="score-section">
 
                     <div className="section-label">
@@ -132,18 +182,29 @@ function Judge() {
                     <div className="scores">
 
                         <div className="score">
-                            <span>Contestant 1</span>
-                            <strong>{scores[1]}</strong>
+                            <span>
+                                Contestant 1
+                            </span>
+
+                            <strong>
+                                {scores[1]}
+                            </strong>
                         </div>
 
                         <div className="score">
-                            <span>Contestant 2</span>
-                            <strong>{scores[2]}</strong>
+                            <span>
+                                Contestant 2
+                            </span>
+
+                            <strong>
+                                {scores[2]}
+                            </strong>
                         </div>
 
                     </div>
 
                 </section>
+
 
                 <div className="judge-actions">
 
@@ -163,8 +224,11 @@ function Judge() {
 
                 </div>
 
+
                 {result && (
-                    <div className={`judge-result ${result}`}>
+                    <div
+                        className={`judge-result ${result}`}
+                    >
                         {result === "correct"
                             ? "RIGHT ANSWER!"
                             : "WRONG ANSWER!"}
