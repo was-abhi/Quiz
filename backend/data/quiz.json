@@ -14,11 +14,46 @@
       "id": 3,
       "question": "What is 12 multiplied by 8?",
       "answer": "96"
+    },
+    {
+      "id": 4,
+      "question": "Which planet is known as the Red Planet?",
+      "answer": "Mars"
+    },
+    {
+      "id": 5,
+      "question": "What does CPU stand for?",
+      "answer": "Central Processing Unit"
+    },
+    {
+      "id": 6,
+      "question": "How many bits are there in one byte?",
+      "answer": "8"
+    },
+    {
+      "id": 7,
+      "question": "Who developed the theory of general relativity?",
+      "answer": "Albert Einstein"
+    },
+    {
+      "id": 8,
+      "question": "What is the chemical symbol for gold?",
+      "answer": "Au"
+    },
+    {
+      "id": 9,
+      "question": "Which data structure follows the Last In, First Out principle?",
+      "answer": "Stack"
+    },
+    {
+      "id": 10,
+      "question": "What is the largest ocean on Earth?",
+      "answer": "Pacific Ocean"
     }
   ],
   "scores": {
-    "1": 2,
-    "2": 0
+    "1": 0,
+    "2": 1
   },
-  "current_question": 2
+  "current_question": 0
 }

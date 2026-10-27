@@ -1,97 +1,126 @@
-import { useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
+import { getCompetitionState } from "../services/api";
+import { useCompetitionWebSocket } from "../services/websocket";
 
 function Audience() {
-    const [questionNumber, setQuestionNumber] = useState(1);
+    const [state, setState] = useState(null);
+    const [error, setError] = useState("");
 
-    const [question, setQuestion] = useState(
-        "What is the capital of France?"
-    );
+    const applyState = useCallback((nextState) => {
+        setState(nextState);
+    }, []);
 
-    const [firstResponder, setFirstResponder] = useState(1);
-    const [result, setResult] = useState(null);
+    useCompetitionWebSocket("audience", applyState);
 
-    const [scores, setScores] = useState({
-        1: 0,
-        2: 0,
-    });
+    useEffect(() => {
+        let mounted = true;
 
-    const simulateJudgeDecision = (isCorrect) => {
-        setResult(isCorrect ? "correct" : "wrong");
+        getCompetitionState()
+            .then((data) => {
+                if (mounted) {
+                    // The judge endpoint includes the answer.
+                    // Remove it before storing audience state.
+                    if (data.question) {
+                        data = {
+                            ...data,
+                            question: {
+                                id: data.question.id,
+                                question: data.question.question,
+                            },
+                        };
+                    }
 
-        if (isCorrect) {
-            setScores((prev) => ({
-                ...prev,
-                [firstResponder]:
-                    prev[firstResponder] + 10,
-            }));
-        }
-    };
+                    setState(data);
+                }
+            })
+            .catch((err) => {
+                if (mounted) {
+                    setError(
+                        err.message || "Could not connect to the competition."
+                    );
+                }
+            });
 
-    const nextQuestion = () => {
-        const nextNumber = questionNumber + 1;
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
-        setQuestionNumber(nextNumber);
-
-        const responder =
-            nextNumber % 2 === 1 ? 1 : 2;
-
-        setFirstResponder(responder);
-        setResult(null);
-
-        setQuestion(
-            nextNumber % 2 === 1
-                ? "What is the capital of France?"
-                : "Which language is used to create web pages?"
+    if (!state) {
+        return (
+            <div className="audience-page">
+                <p>{error || "Connecting to the live competition..."}</p>
+            </div>
         );
-    };
+    }
+
+    const question = state.question;
+    const result = state.result;
+    const responder = state.responder;
+    const scores = state.scores || { 1: 0, 2: 0 };
+    const phase = state.phase;
 
     return (
         <div className="audience-page">
-
             <header className="audience-header">
-
                 <div>
                     <span>LIVE QUIZ COMPETITION</span>
-                    <h1>Question {questionNumber}</h1>
+
+                    <h1>
+                        {question
+                            ? `Question ${state.question_number}`
+                            : "Competition Finished"}
+                    </h1>
                 </div>
 
                 <div className="live-indicator">
-                    ● LIVE
+                    <span className="live-dot" />
+                    LIVE
                 </div>
-
             </header>
 
             <main className="audience-content">
+                {error && (
+                    <div className="audience-error" role="alert">
+                        {error}
+                    </div>
+                )}
 
                 <section className="audience-question">
+                    <div className="section-label">QUESTION</div>
 
-                    <div className="section-label">
-                        QUESTION
-                    </div>
+                    <h2>
+                        {question?.question ||
+                            "The quiz has ended. Thank you for participating."}
+                    </h2>
 
-                    <h2>{question}</h2>
-
+                    {question && (
+                        <p>
+                            Question {state.question_number} of{" "}
+                            {state.total_questions}
+                        </p>
+                    )}
                 </section>
 
                 <section className="audience-response">
-
-                    <div className="section-label">
-                        FIRST RESPONSE
-                    </div>
+                    <div className="section-label">FIRST RESPONSE</div>
 
                     <div className="audience-responder">
-                        Contestant {firstResponder}
+                        {responder !== null
+                            ? `Contestant ${responder}`
+                            : phase === "answering"
+                              ? "Waiting for a response..."
+                              : "No response yet"}
                     </div>
-
                 </section>
 
                 {result && (
                     <div
-                        className={
-                            result === "correct"
-                                ? "audience-result correct"
-                                : "audience-result wrong"
-                        }
+                        className={`audience-result ${
+                            result === "correct" ? "correct" : "wrong"
+                        }`}
+                        role="status"
                     >
                         {result === "correct"
                             ? "RIGHT ANSWER!"
@@ -100,47 +129,23 @@ function Audience() {
                 )}
 
                 <section className="audience-scores">
-
                     <div>
                         <span>CONTESTANT 1</span>
-                        <strong>{scores[1]}</strong>
+                        <strong>{scores["1"] ?? 0}</strong>
                     </div>
 
                     <div>
                         <span>CONTESTANT 2</span>
-                        <strong>{scores[2]}</strong>
+                        <strong>{scores["2"] ?? 0}</strong>
                     </div>
-
                 </section>
 
-                {/* Temporary development controls.
-                    These will disappear when WebSocket
-                    communication is connected. */}
-
-                <div className="dev-controls">
-
-                    <button
-                        onClick={() =>
-                            simulateJudgeDecision(true)
-                        }
-                    >
-                        Simulate RIGHT
-                    </button>
-
-                    <button
-                        onClick={() =>
-                            simulateJudgeDecision(false)
-                        }
-                    >
-                        Simulate WRONG
-                    </button>
-
-                    <button onClick={nextQuestion}>
-                        Next Question
-                    </button>
-
+                <div className="audience-status">
+                    {phase === "ready" && "Waiting for the next question to begin"}
+                    {phase === "answering" && "BUZZERS ARE LIVE"}
+                    {phase === "answered" && "Answer evaluated"}
+                    {phase === "finished" && "COMPETITION FINISHED"}
                 </div>
-
             </main>
         </div>
     );
