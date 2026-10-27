@@ -1,0 +1,24 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "What is the capital of France?",
+      "answer": "Paris"
+    },
+    {
+      "id": 2,
+      "question": "Which language is used to structure web pages?",
+      "answer": "HTML"
+    },
+    {
+      "id": 3,
+      "question": "What is 12 multiplied by 8?",
+      "answer": "96"
+    }
+  ],
+  "scores": {
+    "1": 0,
+    "2": 0
+  },
+  "current_question": 0
+}
