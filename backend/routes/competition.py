@@ -6,7 +6,10 @@ from services.competition import competition
 from middleware.event_handler import process_device_message
 from middleware.websocket_manager import websocket_manager
 
-router = APIRouter(prefix="/api/competition", tags=["Competition"])
+router = APIRouter(
+    prefix="/api/competition",
+    tags=["Competition"],
+)
 
 
 class EvaluationRequest(BaseModel):
@@ -22,10 +25,20 @@ async def get_state():
     return competition.judge_state()
 
 
+# Reset the current question, like the ESP32 reset switch.
 @router.post("/start")
 async def start_question():
     try:
         return await competition.start_question()
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error))
+
+
+# Enable contestant responses for the current question.
+@router.post("/activate")
+async def activate_question():
+    try:
+        return await competition.activate_question()
     except ValueError as error:
         raise HTTPException(status_code=409, detail=str(error))
 
@@ -46,7 +59,7 @@ async def next_question():
         raise HTTPException(status_code=409, detail=str(error))
 
 
-# Development-only endpoint. Do not expose this in production.
+# Development-only endpoint. Do not expose in production.
 @router.post("/dev/mock-response")
 async def mock_response(request: MockResponseRequest):
     try:
@@ -75,7 +88,6 @@ async def competition_websocket(websocket: WebSocket, view: str):
         await websocket.send_json(state)
 
         while True:
-            # Keep the connection open. State updates are server-pushed.
             await websocket.receive_text()
 
     except Exception:

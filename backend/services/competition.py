@@ -35,11 +35,12 @@ class CompetitionService:
 
     def audience_state(self):
         state = self.judge_state().copy()
+        question = state["question"]
 
-        if state["question"] is not None:
+        if question is not None:
             state["question"] = {
-                "id": state["question"]["id"],
-                "question": state["question"]["question"],
+                "id": question["id"],
+                "question": question["question"],
             }
 
         return state
@@ -51,12 +52,29 @@ class CompetitionService:
         })
 
     async def start_question(self):
-        if self.phase == "finished":
-            raise ValueError("The quiz has finished.")
-
+        """Reset the current question without changing scores or question index."""
         if self.current_question() is None:
             self.phase = "finished"
             raise ValueError("There are no more questions.")
+
+        self.responder = None
+        self.result = None
+        self.point_awarded = False
+        self.phase = "ready"
+
+        await self.publish()
+        return self.judge_state()
+
+    async def activate_question(self):
+        """Allow contestants to respond to the current question."""
+        if self.current_question() is None:
+            self.phase = "finished"
+            raise ValueError("There are no more questions.")
+
+        if self.phase != "ready":
+            raise ValueError(
+                "The question must be reset or advanced before activation."
+            )
 
         self.responder = None
         self.result = None

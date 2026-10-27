@@ -1,109 +1,81 @@
-import { useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+    activateQuestion,
+    resetQuestion,
+    evaluateAnswer,
+    nextQuestion,
+    getCompetitionState,
+} from "../services/api";
+import { useCompetitionWebSocket } from "../services/websocket";
+
 
 function Judge() {
-    const [questionNumber, setQuestionNumber] = useState(1);
+    const [state, setState] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const [question, setQuestion] = useState(
-        "What is the capital of France?"
-    );
+    const applyState = useCallback((nextState) => {
+        setState(nextState);
+    }, []);
 
-    const [answer, setAnswer] = useState("Paris");
+    useCompetitionWebSocket("judge", applyState);
 
-    // Contestant currently answering
-    const [currentResponder, setCurrentResponder] = useState(1);
+    useEffect(() => {
+        let mounted = true;
 
-    // null = no decision yet
-    // "correct" = current responder was marked correct
-    // "wrong" = current responder was marked wrong
-    const [result, setResult] = useState(null);
+        getCompetitionState()
+            .then((data) => {
+                if (mounted) setState(data);
+            })
+            .catch((err) => {
+                if (mounted) {
+                    setError(err.message || "Could not load competition state.");
+                }
+            });
 
-    // Who received the point for this question
-    const [pointAwardedTo, setPointAwardedTo] = useState(null);
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
-    const [scores, setScores] = useState({
-        1: 0,
-        2: 0,
-    });
+    const performAction = async (action) => {
+        setLoading(true);
+        setError("");
 
-    // Start the question.
-    // For now, first response alternates between contestants.
-    const startQuestion = () => {
-        const responder = questionNumber % 2 === 1 ? 1 : 2;
-
-        setCurrentResponder(responder);
-        setResult(null);
-        setPointAwardedTo(null);
-    };
-
-    const evaluateAnswer = (isCorrect) => {
-        if (isCorrect) {
-            // If this question has already awarded a point,
-            // do nothing. A question can only give 1 point.
-            if (pointAwardedTo !== null) {
-                return;
-            }
-
-            setScores((prev) => ({
-                ...prev,
-                [currentResponder]:
-                    prev[currentResponder] + 1,
-            }));
-
-            setPointAwardedTo(currentResponder);
-            setResult("correct");
-
-        } else {
-            // If the current responder previously got the point,
-            // retract that point.
-            if (pointAwardedTo !== null) {
-                setScores((prev) => ({
-                    ...prev,
-                    [pointAwardedTo]:
-                        prev[pointAwardedTo] - 1,
-                }));
-
-                setPointAwardedTo(null);
-            }
-
-            setResult("wrong");
-
-            // Give the other contestant a chance.
-            const nextResponder =
-                currentResponder === 1 ? 2 : 1;
-
-            setCurrentResponder(nextResponder);
+        try {
+            const updatedState = await action();
+            setState(updatedState);
+        } catch (err) {
+            setError(
+                err.message || "The requested action could not be completed."
+            );
+        } finally {
+            setLoading(false);
         }
     };
 
-    const nextQuestion = () => {
-        const nextNumber = questionNumber + 1;
-
-        setQuestionNumber(nextNumber);
-
-        const responder =
-            nextNumber % 2 === 1 ? 1 : 2;
-
-        setCurrentResponder(responder);
-
-        setResult(null);
-        setPointAwardedTo(null);
-
-        setQuestion(
-            nextNumber % 2 === 1
-                ? "What is the capital of France?"
-                : "Which language is used to create web pages?"
+    if (!state) {
+        return (
+            <div className="judge-page">
+                <p>{error || "Connecting to the competition server..."}</p>
+            </div>
         );
+    }
 
-        setAnswer(
-            nextNumber % 2 === 1
-                ? "Paris"
-                : "HTML"
-        );
-    };
+    const question = state.question;
+    const phase = state.phase;
+    const result = state.result;
+    const responder = state.responder;
+    const scores = state.scores || { 1: 0, 2: 0 };
+
+    const canReset = phase !== "finished";
+    const canActivate = phase === "ready" && question !== null;
+    const canEvaluate = phase === "answering" && responder !== null;
+    const canAdvance = phase === "answered";
 
     return (
         <div className="judge-page">
-
             <header className="judge-header">
                 <div>
                     <h1>Quiz Competition</h1>
@@ -111,49 +83,48 @@ function Judge() {
                 </div>
 
                 <div className="question-number">
-                    Question {questionNumber}
+                    {question
+                        ? `Question ${state.question_number} of ${state.total_questions}`
+                        : "Competition finished"}
                 </div>
             </header>
 
             <main className="judge-content">
+                {error && (
+                    <div className="judge-error" role="alert">
+                        {error}
+                    </div>
+                )}
 
                 <section className="quiz-section">
-
-                    <div className="section-label">
-                        QUESTION
-                    </div>
+                    <div className="section-label">QUESTION</div>
 
                     <div className="question-box">
-                        {question}
+                        {question?.question || "No question available."}
                     </div>
 
-                    <div className="section-label">
-                        ANSWER
-                    </div>
+                    <div className="section-label">ANSWER</div>
 
                     <div className="answer-box">
-                        {answer}
+                        {question?.answer || "Unavailable"}
                     </div>
-
                 </section>
 
-
                 <section className="response-section">
-
-                    <div className="section-label">
-                        CURRENT RESPONSE
-                    </div>
+                    <div className="section-label">CURRENT RESPONSE</div>
 
                     <div className="responder">
-                        Contestant {currentResponder}
+                        {responder !== null
+                            ? `Contestant ${responder}`
+                            : "No response yet"}
                     </div>
 
                     <div className="evaluation-buttons">
-
                         <button
                             className="right-button"
+                            disabled={loading || !canEvaluate}
                             onClick={() =>
-                                evaluateAnswer(true)
+                                performAction(() => evaluateAnswer(true))
                             }
                         >
                             RIGHT
@@ -161,80 +132,75 @@ function Judge() {
 
                         <button
                             className="wrong-button"
+                            disabled={loading || !canEvaluate}
                             onClick={() =>
-                                evaluateAnswer(false)
+                                performAction(() => evaluateAnswer(false))
                             }
                         >
                             WRONG
                         </button>
-
                     </div>
-
                 </section>
-
 
                 <section className="score-section">
-
-                    <div className="section-label">
-                        SCORE
-                    </div>
+                    <div className="section-label">SCORE</div>
 
                     <div className="scores">
-
                         <div className="score">
-                            <span>
-                                Contestant 1
-                            </span>
-
-                            <strong>
-                                {scores[1]}
-                            </strong>
+                            <span>Contestant 1</span>
+                            <strong>{scores["1"] ?? 0}</strong>
                         </div>
 
                         <div className="score">
-                            <span>
-                                Contestant 2
-                            </span>
-
-                            <strong>
-                                {scores[2]}
-                            </strong>
+                            <span>Contestant 2</span>
+                            <strong>{scores["2"] ?? 0}</strong>
                         </div>
-
                     </div>
-
                 </section>
 
-
                 <div className="judge-actions">
+                    <button
+                        className="start-button"
+                        disabled={loading || !canReset}
+                        onClick={() =>
+                            performAction(() => resetQuestion())
+                        }
+                    >
+                        RESET QUESTION
+                    </button>
 
                     <button
                         className="start-button"
-                        onClick={startQuestion}
+                        disabled={loading || !canActivate}
+                        onClick={() =>
+                            performAction(() => activateQuestion())
+                        }
                     >
-                        START QUESTION
+                        ACTIVATE QUESTION
                     </button>
 
                     <button
                         className="next-button"
-                        onClick={nextQuestion}
+                        disabled={loading || !canAdvance}
+                        onClick={() =>
+                            performAction(() => nextQuestion())
+                        }
                     >
                         NEXT QUESTION
                     </button>
-
                 </div>
 
+                <div className="judge-status">
+                    Status: {phase.replaceAll("_", " ").toUpperCase()}
+                </div>
 
                 {result && (
-                    <div
-                        className={`judge-result ${result}`}
-                    >
+                    <div className={`judge-result ${result}`}>
                         {result === "correct"
                             ? "RIGHT ANSWER!"
                             : "WRONG ANSWER!"}
                     </div>
                 )}
-
             </main>
         </div>
     );
